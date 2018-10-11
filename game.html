@@ -4,8 +4,8 @@
     <!--HTML comment syntax-->
     <meta charset="utf-8" />
     <title>Steffee Game Canvas Project</title>
-    <link rel="stylesheet" type="text/css" href="stylesheet.css">
-    <!--Credit to developer.mozilla.org-->
+    <!--<link rel="stylesheet" type="text/css" href="stylesheet.css">-->
+    <!--Credit to developer.mozilla.org for providing me with the tutorial-->
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
@@ -13,14 +13,14 @@
 </head>
 <body> 
 
-    <div class="topnav">
+    <!--<div class="topnav">
         <a href="index.html">HOME</a>
         <a href="link.html">EMBEDED ELEMENTS</a>
         <a href="aboutme.html">ABOUT ME</a>
         <a href="https://www.seriouseats.com/">RECIPES</a>
         <a href="contact.html">CONTACT ME</a>
-        <a href="game.html">BRICK</a>
-    </div>
+       // <a href="game.html">BRICK</a>
+    //</div>-->
 
 <canvas id="myCanvas" width="480" height="320"></canvas>
 
@@ -63,8 +63,66 @@
         //defines button presses
         var rightPressed = false;
         var leftPressed = false;
-        /*function draw() {
-            // drawing code
+        //Brick Variables
+        var brickRowCount = 3;
+        var brickColumnCount = 5;
+        var brickWidth = 75;
+        var brickHeight = 20;
+        var brickPadding = 10;//distance between bricks
+        var brickOffsetTop = 30;//stops from being drawn on edge of canvas
+        var brickOffsetLeft = 30;//stops from being drawn on edge of canvas
+        //Code below will loop through the rows and columns and create new bricks
+        //Note that the brick objects will also be used for collision detection purposes
+        //Creates an array to contain brick columns (c) and rows (r)
+        var bricks = [];
+        for(var c=0; c<brickColumnCount; c++) {
+          bricks[c] = [];
+          for(var r=0; r<brickRowCount; r++) {
+            bricks[c][r] = { x: 0, y: 0, status: 1 };//status 1 = draw it, 0 = do not
+            }
+        }
+        //Brick Drawing Logic - draws bricks as it loops throw the brick array
+        //Problem here is this just draws them
+        /*
+        function drawBricks() {
+            for(var c=0; c<brickColumnCount; c++) {
+                for(var r=0; r<brickRowCount; r++) {
+                    bricks[c][r].x = 0;
+                    bricks[c][r].y = 0;
+                    ctx.beginPath();
+                    ctx.rect(0, 0, brickWidth, brickHeight);
+                    ctx.fillStyle = "#0095DD";
+                    ctx.fill();
+                    ctx.closePath();
+                }
+            }
+        }
+        */
+        //Brick Drawing Logic - draws bricks as it loops throw the brick array
+        //The below will find the proper x and y location for each brich based
+        //on brick column, row, size, offset, and padding
+        function drawBricks() {
+            for(var c=0; c<brickColumnCount; c++) {
+                for(var r=0; r<brickRowCount; r++) {
+                    var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+                    var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+                    if(bricks[c][r].status == 1) {//checks brick status before drawing
+                      var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+                      var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+                      bricks[c][r].x = brickX;
+                      bricks[c][r].y = brickY;
+                      ctx.beginPath();
+                      ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                      ctx.fillStyle = "#0095DD";
+                      ctx.fill();
+                      ctx.closePath();
+                    }
+                }
+            }
+        }
+        /*
+        // drawing code
+        function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);//clears path after each frame
             ctx.beginPath();
             ctx.arc(x, y, 10, 0, Math.PI*2);
@@ -73,7 +131,8 @@
             ctx.closePath();
             x += dx;
             y += dy;
-        }*/
+        }
+        */
         function drawBall() {
             ctx.beginPath();
             ctx.arc(x, y, ballRadius, 0, Math.PI*2);
@@ -89,11 +148,12 @@
             ctx.fill();
             ctx.closePath();
         }       
-
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBricks();// draws the bricks
             drawBall();//draws ball
             drawPaddle();//draws paddle
+            collisionDetection();
             x += dx;
             y += dy;
             //bounces balls off bulkheads
@@ -121,13 +181,14 @@
             //the following expands on the above to check if the ball hits the paddle and game over if it hits the lava
             if(y + dy < ballRadius) {
                 dy = -dy;
-            } else if(y + dy > canvas.height-ballRadius) {
+            } 
+            else if(y + dy > canvas.height-ballRadius) {
                 if(x > paddleX && x < paddleX + paddleWidth) {
                     dy = -dy;
                 }
                 else {
                     alert("GAME OVER");
-                    document.location.reload();
+                    document.location.reload(true);                    
                 }
             }
             //if left/right is pressed paddles moves 7 pixels respectively(sp?)
@@ -161,7 +222,6 @@
                 leftPressed = true;
             }
         }
-
         function keyUpHandler(e) {
             if(e.keyCode == 39) {
                 rightPressed = false;
@@ -170,7 +230,26 @@
                 leftPressed = false;
             }
         }
-    
+        // The below checks for collision
+        //A collision meets the following conditions
+        //The x position of the ball is greater than the x position of the brick.
+        //The x position of the ball is less than the x position of the brick plus its width.
+        //The y position of the ball is greater than the y position of the brick.
+        //The y position of the ball is less than the y position of the brick plus its height.
+        function collisionDetection() {
+            for(var c=0; c<brickColumnCount; c++) {
+                for(var r=0; r<brickRowCount; r++) {
+                    var b = bricks[c][r];
+                    if(b.status == 1) {//only draws brick if status is 1
+                      if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                          dy = -dy;
+                          b.status = 0;
+                      }
+                   }  
+                    }
+            }
+        }
+
         setInterval(draw, 10);
 </script>
 
