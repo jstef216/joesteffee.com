@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--HTML comment syntax-->
+    <meta charset="utf-8" />
+    <title>Steffee Game Canvas Project</title>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <!--Credit to developer.mozilla.org-->
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body> 
+
+    <div class="topnav">
+        <a href="index.html">HOME</a>
+        <a href="link.html">EMBEDED ELEMENTS</a>
+        <a href="aboutme.html">ABOUT ME</a>
+        <a href="https://www.seriouseats.com/">RECIPES</a>
+        <a href="contact.html">CONTACT ME</a>
+        <a href="game.html">BRICK</a>
+    </div>
+
+<canvas id="myCanvas" width="480" height="320"></canvas>
+
+<script>
+	/*
+    JavaScript comment syntax
+    */
+    //JavaScript comment syntax
+    var canvas = document.getElementById("myCanvas"); //Stores a reference to the <canvas> element to the canvas variable
+    var ctx = canvas.getContext("2d");//Stores the 2D rendering context - tool used to paint on the canvas
+    //The following creates and fills the canvas
+    //Example code for a red rectangle
+        //ctx.beginPath();
+        //ctx.rect(20, 40, 50, 50);//first two are coord for top left corner, last two are width and height
+        //ctx.fillStyle = "#FF0000";//stores color in hexadecimal
+        //ctx.fill();//fils the rect
+        //ctx.closePath();
+    //Example code for a green circle
+        //ctx.beginPath();
+        //ctx.arc(240, 160, 20, 0, Math.PI*2, false);//(X coor of center, Y coor of center, arc radius, start angle, end angle, direction of drawing - false for clockwise)
+        //ctx.fillStyle = "green";//stores color as color keyword
+        //ctx.fill();
+        //ctx.closePath();
+    //Example code showing a blue outer-stoked empty rectangle
+        //ctx.beginPath();
+        //ctx.rect(160, 10, 100, 40);
+        //ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";//alpha channel in rgba() fuction makes the blue color semi transparent
+        //What does the above comment mean?
+        //ctx.stroke();
+        //ctx.closePath();
+        var x = canvas.width/2; //define x
+        var y = canvas.height-30; //define y
+        var dx = 2;// makes ball appear to move
+        var dy = -2;// makes ball appear to move
+        var ballRadius = 10;//holds radius of drawn circle for calcs
+        //initiates paddle
+        var paddleHeight = 10;
+        var paddleWidth = 75;
+        var paddleX = (canvas.width-paddleWidth)/2;
+        //defines button presses
+        var rightPressed = false;
+        var leftPressed = false;
+        /*function draw() {
+            // drawing code
+            ctx.clearRect(0, 0, canvas.width, canvas.height);//clears path after each frame
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, Math.PI*2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+            x += dx;
+            y += dy;
+        }*/
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+    
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }       
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBall();//draws ball
+            drawPaddle();//draws paddle
+            x += dx;
+            y += dy;
+            //bounces balls off bulkheads
+            /*if(x + dx > canvas.width || x + dx < 0) {
+                dx = -dx;
+            }*/
+            //fancy ^^ off circ edge instead of center
+            if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+                dx = -dx;
+            }
+            //bounces balls off decks and overheads
+            //fancy ^^ off circ edge instead of center
+            /*if(y + dy > canvas.height || y + dy < 0) {
+                dy = -dy;
+            }*/
+            /*if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
+                dy = -dy;
+            }*/
+          /*  if(y + dy < ballRadius) {
+                dy = -dy;
+            } else if(y + dy > canvas.height-ballRadius) {
+                alert("GAME OVER");
+                document.location.reload();
+            }*/
+            //the following expands on the above to check if the ball hits the paddle and game over if it hits the lava
+            if(y + dy < ballRadius) {
+                dy = -dy;
+            } else if(y + dy > canvas.height-ballRadius) {
+                if(x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy;
+                }
+                else {
+                    alert("GAME OVER");
+                    document.location.reload();
+                }
+            }
+            //if left/right is pressed paddles moves 7 pixels respectively(sp?)
+            /*if(rightPressed) {
+                paddleX += 7;
+            }
+            else if(leftPressed) {
+                paddleX -= 7;
+            }*/
+            //same as above but within canvas confines
+            if(rightPressed && paddleX < canvas.width-paddleWidth) {
+                paddleX += 7;
+            }
+            else if(leftPressed && paddleX > 0) {
+                paddleX -= 7;
+            }
+        }
+    
+        //Listens for key presses
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+    
+        //when pressed true
+        // key code 37 is left cursor
+        // key code 39 is right cursor
+        function keyDownHandler(e) {
+            if(e.keyCode == 39) {
+                rightPressed = true;
+            }
+            else if(e.keyCode == 37) {
+                leftPressed = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if(e.keyCode == 39) {
+                rightPressed = false;
+            }
+            else if(e.keyCode == 37) {
+                leftPressed = false;
+            }
+        }
+    
+        setInterval(draw, 10);
+</script>
+
+</body>
+</html>
