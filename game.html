@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html>
 <head>
     <!--HTML comment syntax-->
@@ -51,6 +51,7 @@
         //What does the above comment mean?
         //ctx.stroke();
         //ctx.closePath();
+        var run = setInterval(draw, 10);;
         var x = canvas.width/2; //define x
         var y = canvas.height-30; //define y
         var dx = 2;// makes ball appear to move
@@ -180,15 +181,18 @@
             }*/
             //the following expands on the above to check if the ball hits the paddle and game over if it hits the lava
             if(y + dy < ballRadius) {
-                dy = -dy;
+                dy = -dy; 
             } 
             else if(y + dy > canvas.height-ballRadius) {
                 if(x > paddleX && x < paddleX + paddleWidth) {
                     dy = -dy;
                 }
                 else {
+                    
                     alert("GAME OVER");
-                    document.location.reload(true);                    
+                    //document.location.reload(true); 
+                    clearInterval(run);
+                                       
                 }
             }
             //if left/right is pressed paddles moves 7 pixels respectively(sp?)
@@ -249,8 +253,10 @@
                     }
             }
         }
-
-        setInterval(draw, 10);
+        
+          run;
+        
+        
 </script>
 
 </body>
